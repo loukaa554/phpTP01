@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+	Rayons
+{% endblock %}
+
+{% block body %}
+<div class="card col-md-12">
+    <div class="card-header">
+        <a class="btn-back text-secondary" href="{{ path('app_boutique') }}">
+            <i class="fas fa-2x fa-arrow-circle-left"></i>
+        </a>
+        <h3>
+            <i class="fas fa-store"></i>
+            Recherche de "{{ chercher }}"
+            <span class="badge badge-pill badge-info">{{ produits|length }}</span>
+            produit(s)
+        </h3>
+    </div>
+    <div class="card-body row">
+        {% if produits %}
+            {% for produit in produits %}
+                <div class="col-md-3">
+                    <div class="card clickable" onclick="location.href='{{ path("app_boutique_rayon", { idCategorie: loop.index }) }}'">
+                        <img src="{{ asset(produit.visuel) }}" class="card-img-top" alt="{{ produit.libelle }}">
+                        <div class="card-body">
+                            <h4 class="card-title">{{ produit.libelle }}</h4>
+                            <p class="card-text">
+                                <i>{{ produit.texte }}</i>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-center w-100">Aucune catégorie disponible.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

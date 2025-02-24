@@ -1,0 +1,54 @@
+{# Barre de navigation #}
+<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+	<a class="navbar-brand" href="{{ path('app_default_index') }}">
+		<i class="fas fa-home"></i>
+		{{ 'navbar.title' | trans }}
+	</a>
+	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+		<span class="navbar-toggler-icon"></span>
+	</button>
+	<div class="collapse navbar-collapse" id="navbarsExampleDefault">
+		<ul class="navbar-nav mr-auto">
+			<li class="nav-item">
+				<a class="nav-link" href="{{ path('app_boutique') }}">
+					<i class="fas fa-store"></i>
+					{{ 'navbar.list.shop' | trans }}
+				</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link" href="{{ path('app_default_contact') }}">
+					<i class="fas fa-comments"></i>
+					{{ 'navbar.list.contact' | trans }}
+				</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link" href="{{ path('app_panier') }}">
+					<i class="fas fa-comments"></i>
+					{{ 'navbar.list.panier' | trans }}
+				</a>
+			</li>
+		</ul>
+		<form class="form-inline my-2 my-lg-0" >
+			<input class="form-control mr-sm-2" id="searchString" type="text" placeholder={{ 'navbar.search.placeholder' | trans }} aria-label="Search">
+			<button class="btn btn-secondary my-2 my-sm-0" id="searchButton">
+				<i class="fas fa-search"></i>
+			</button>
+		</form>
+		<ul class="navbar-nav my-0">
+			<li class="nav-item dropdown">
+				<span class="nav-link dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+					<img src="{{ asset('images/locale/' ~ app.request.locale ~ '.png') }}" alt="{{ app.request.locale }}">
+				</span>
+				<div class="dropdown-menu" aria-labelledby="dropdown01" style="min-width: 5rem;">
+					{% for locale in supported_locales | split('|') %}
+						{% if locale != app.request.locale %}
+							<a class="dropdown-item" href="{{ path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')|merge({'_locale': locale})) }}">
+								<img src="{{ asset('images/locale/' ~ locale ~ '.png') }}" alt="{{ locale }}">
+							</a>
+						{% endif %}
+					{% endfor %}
+				</div>
+			</li>
+		</ul>
+	</div>
+</nav>
