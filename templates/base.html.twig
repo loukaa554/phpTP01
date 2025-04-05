@@ -36,8 +36,10 @@
 							</h1>
 						{%  endblock %}
 						<!-- fin du block body -->
+
 					</div>
 				</div>
+				{{ render(controller('App\\Controller\\BoutiqueController::topVentes')) }}
 			</div>
 		</main>
 		<!-- JS : JQuery, Bootstrap -->

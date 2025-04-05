@@ -7,7 +7,7 @@
     <div class="main-div">
         <div class="card col-md-12">
             <div class="card-header">
-                <a class="btn-back text-secondary" href="/info/R401/fr/boutique/">
+                <a class="btn-back text-secondary" href={{ path('app_boutique') }}>
                     <i class="fas fa-2x fa-arrow-circle-left"></i>
                 </a>
                 <h3>
@@ -27,7 +27,7 @@
                         {% endif %}
                 </h3>
                     <div class="col-md-6 align-self-center btn-group btn-group" role="group">
-                        <a class="btn btn-primary" href="/info/R401/fr/panier/commander">
+                        <a class="btn btn-primary" href={{ path('app_panier_commander') }}>
                             Passer la commande
                         </a>
                     </div>
@@ -65,7 +65,7 @@
                                                 <i class="fas fa-minus-square text-muted"></i>
                                             </a>
                                             {{ p.quantite }}
-                                            <a href="{{path("app_panier_ajouter", { idProduit: p.produit.id, quantite: 1 + p.quantite })}}">
+                                            <a href="{{path("app_panier_ajouter", { idProduit: p.produit.id, quantite: 1  })}}">
                                                 <i class="fas fa-plus-square text-muted"></i>
                                             </a>
                                         </td>

@@ -16,7 +16,7 @@
             </trans-unit>
             <trans-unit id="1ea4n8m">
                 <source>navbar.list.panier</source>
-                <target>Produits</target>
+                <target>Produit(s)</target>
             </trans-unit>
             <trans-unit id="1eq4n8m">
                 <source>navbar.search.placeholder</source>

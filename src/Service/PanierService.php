@@ -1,91 +1,179 @@
 <?php
+
 namespace App\Service;
 
+use App\Entity\Commande;
+use App\Entity\LigneCommande;
+use App\Entity\Usager;
+use App\Repository\ProduitRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
-use App\Service\BoutiqueService;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
-// Service pour manipuler le panier et le stocker en session
+/**
+ * Service permettant de manipuler un panier d'achats en session.
+ */
 class PanierService
 {
-    ////////////////////////////////////////////////////////////////////////////
-    private $session;   // Le service session
-    private $boutique;  // Le service boutique
-    private $panier;    // Tableau associatif, la clé est un idProduit, la valeur associée est une quantité
-                        //   donc $this->panier[$idProduit] = quantité du produit dont l'id = $idProduit
-    const PANIER_SESSION = 'panier'; // Le nom de la variable de session pour faire persister $this->panier
+    private SessionInterface $session; // Service pour manipuler la session.
+    private ProduitRepository $boutique; // Service permettant d'accéder aux produits.
+    private array $panier; // Contient les produits en panier (idProduit => quantité).
 
-    // Constructeur du service
-    public function __construct(RequestStack $requestStack, BoutiqueService $boutique)
+    private const PANIER_SESSION = 'panier'; // Clé de session pour stocker le panier.
+
+    /**
+     * Constructeur du service Panier.
+     *
+     * @param RequestStack $requestStack Service permettant d'accéder à la session.
+     * @param ProduitRepository $boutique Repository permettant de récupérer les produits.
+     */
+    public function __construct(RequestStack $requestStack, ProduitRepository $boutique)
     {
-        // Récupération des services session et BoutiqueService
         $this->boutique = $boutique;
         $this->session = $requestStack->getSession();
-        // Récupération du panier en session s'il existe, init. à vide sinon
         $this->panier = $this->session->get(self::PANIER_SESSION, []);
     }
 
-    // Renvoie le montant total du panier
-    public function getTotal() : float {
-      $total = 0;
-      foreach ($this->panier as $idProduit => $quantity) {
-        $produit = $this->boutique->findProduitById($idProduit);
-        $total += $produit->prix * $quantity;
-      }
-      return $total;
+    /**
+     * Retourne le montant total du panier.
+     * Le total est calculé en multipliant le prix de chaque produit par sa quantité.
+     *
+     * @return float Montant total du panier.
+     */
+    public function getTotal(): float
+    {
+        $total = 0;
+        foreach ($this->panier as $idProduit => $quantity) {
+            $produit = $this->boutique->findProduitById($idProduit);
+            if ($produit) {
+                $total += $produit->getPrix() * $quantity;
+            }
+        }
+        return $total;
     }
 
-    // Renvoie le nombre de produits dans le panier
-    public function getNombreProduits() : int
+    /**
+     * Retourne le nombre total de produits dans le panier.
+     *
+     * @return int Nombre de produits dans le panier.
+     */
+    public function getNombreProduits(): int
     {
-      $total = 0;
-      foreach ($this->panier as $quantity) {
-        $total += $quantity;
-      }
-      return $total;
+        return array_sum($this->panier); // Calcul de la somme de toutes les quantités.
     }
 
-    // Ajouter au panier le produit $idProduit en quantite $quantite 
-    public function ajouterProduit(int $idProduit, int $quantite = 1) : void
+    /**
+     * Ajoute un produit au panier.
+     * Si le produit existe déjà, la quantité est incrémentée, sinon il est ajouté avec la quantité spécifiée.
+     *
+     * @param int $idProduit L'ID du produit à ajouter.
+     * @param int $quantite La quantité de produit à ajouter (par défaut 1).
+     */
+    public function ajouterProduit(int $idProduit, int $quantite = 1): void
     {
-      if(isset($this->panier[$idProduit]) ) {
-        $this->panier[$idProduit] += $quantite;
-      } else {
-        $this->panier[$idProduit] = $quantite;
-      }
+        $this->panier[$idProduit] = ($this->panier[$idProduit] ?? 0) + $quantite;
+        $this->session->set(self::PANIER_SESSION, $this->panier);
     }
 
-    // Enlever du panier le produit $idProduit en quantite $quantite 
-    public function enleverProduit(int $idProduit, int $quantite = 1) : void
+    /**
+     * Enlève une quantité donnée d'un produit du panier.
+     * Si la quantité devient inférieure ou égale à 0, le produit est supprimé du panier.
+     *
+     * @param int $idProduit L'ID du produit à enlever.
+     * @param int $quantite La quantité à enlever (par défaut 1).
+     */
+    public function enleverProduit(int $idProduit, int $quantite = 1): void
     {
-      if($this->panier[$idProduit]) {
-        $this->panier[$idProduit] -= $quantite;
-      }
+        if (isset($this->panier[$idProduit])) {
+            $this->panier[$idProduit] -= $quantite;
+            if ($this->panier[$idProduit] <= 0) {
+                unset($this->panier[$idProduit]); // Si la quantité est <= 0, on enlève le produit.
+            }
+            $this->session->set(self::PANIER_SESSION, $this->panier);
+        }
     }
 
-    // Supprimer le produit $idProduit du panier
-    public function supprimerProduit(int $idProduit) : void
+    /**
+     * Supprime un produit du panier.
+     *
+     * @param int $idProduit L'ID du produit à supprimer.
+     */
+    public function supprimerProduit(int $idProduit): void
     {
-      unset($this->panier[$idProduit]);
+        unset($this->panier[$idProduit]);
+        $this->session->set(self::PANIER_SESSION, $this->panier);
     }
 
-    // Vider complètement le panier
-    public function vider() : void
+    /**
+     * Vide complètement le panier.
+     */
+    public function vider(): void
     {
-      $this->panier = [];
+        $this->panier = [];
+        $this->session->set(self::PANIER_SESSION, []);
     }
 
-    // Renvoie le contenu du panier dans le but de l'afficher
-    //   => un tableau d'éléments [ "produit" => un objet produit, "quantite" => sa quantite ]
-    public function getContenu() : array
+    /**
+     * Renvoie le contenu détaillé du panier sous forme de tableau.
+     * Chaque élément contient le produit et sa quantité.
+     *
+     * @return array Tableau des produits avec leur quantité.
+     */
+    public function getContenu(): array
     {
-      $contenu = [];
-      foreach ($this->panier as $idProduit => $quantite) {
-        $produit = $this->boutique->findProduitById($idProduit);
-        $contenu[] = [
-          'produit' => $produit,
-          'quantite' => $quantite,
-        ];
-      }
-      return $contenu;
+        $contenu = [];
+        foreach ($this->panier as $idProduit => $quantite) {
+            $produit = $this->boutique->findProduitById($idProduit);
+            if ($produit) {
+                $contenu[] = ['produit' => $produit, 'quantite' => $quantite];
+            }
+        }
+        return $contenu;
+    }
+
+    /**
+     * Convertit le contenu du panier en une commande pour un usager.
+     * Crée une nouvelle commande, associe les produits du panier et les ajoute à la base de données.
+     * Une fois la commande créée, le panier est vidé.
+     *
+     * @param Usager $usager L'usager qui passe la commande.
+     * @param EntityManagerInterface $entityManager L'EntityManager pour persister les données.
+     *
+     * @return Commande|null Retourne la commande créée ou null si le panier est vide.
+     */
+    public function panierToCommande(Usager $usager, EntityManagerInterface $entityManager): ?Commande
+    {
+        if (empty($this->panier)) {
+            return null; // Si le panier est vide, on ne crée pas de commande.
+        }
+
+        // Création de la commande
+        $commande = new Commande();
+        $commande->setUsager($usager);
+        $commande->setDateCreation(new \DateTime());
+
+        // Ajout des lignes de commande
+        foreach ($this->panier as $idProduit => $quantite) {
+            $produit = $this->boutique->findProduitById($idProduit);
+            if ($produit) {
+                $ligneCommande = new LigneCommande();
+                $ligneCommande->setProduit($produit);
+                $ligneCommande->setCommande($commande);
+                $ligneCommande->setQuantite($quantite);
+                $ligneCommande->setPrix($produit->getPrix() * $quantite);
+
+                $entityManager->persist($ligneCommande);
+                $commande->addLigneCommande($ligneCommande);
+            }
+        }
+
+        // Persistance de la commande
+        $entityManager->persist($commande);
+        $entityManager->flush();
+
+        // Vide le panier après la création de la commande
+        $this->vider();
+
+        return $commande;
     }
 }

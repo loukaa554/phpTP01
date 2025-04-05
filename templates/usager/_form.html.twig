@@ -1,0 +1,31 @@
+<form name="usager" method="post">
+    <div id="usager">
+        <div class="form-group">
+            {{ form_label(form.email, 'Email', {'label_attr': {'class': 'required'}}) }}
+            {{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
+        </div>
+        <div class="form-group">
+            {{ form_label(form.password, 'Mot de passe', {'label_attr': {'class': 'required'}}) }}
+            {{ form_widget(form.password, {'attr': {'class': 'form-control'}}) }}
+        </div>
+        <div class="form-group">
+            {{ form_label(form.nom, 'Nom', {'label_attr': {'class': 'required'}}) }}
+            {{ form_widget(form.nom, {'attr': {'class': 'form-control'}}) }}
+        </div>
+        <div class="form-group">
+            {{ form_label(form.prenom, 'Prénom', {'label_attr': {'class': 'required'}}) }}
+            {{ form_widget(form.prenom, {'attr': {'class': 'form-control'}}) }}
+        </div>
+        {# Si tu as un champ captcha ou un autre champ supplémentaire, tu peux le mettre ici comme suit : #}
+        <div class="form-group">
+            {{ form_label(form.captcha, 'Captcha', {'label_attr': {'class': 'required'}}) }}
+             {{ form_widget(form.captcha, {'attr': {'class': 'form-control'}}) }}
+        </div>
+
+        {# Token CSRF protection #}
+        {{ form_row(form._token) }}
+    </div>
+    <button class="btn btn-primary btn-block" type="submit">
+        {{ button_label|default('Enregistrer') }}
+    </button>
+</form>

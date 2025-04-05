@@ -16,6 +16,12 @@ class CategorieRepository extends ServiceEntityRepository
         parent::__construct($registry, Categorie::class);
     }
 
+    public function findAllCategories(): array {
+        return $this->createQueryBuilder('c')
+            ->getQuery()
+            ->getResult();
+    }
+
 //    /**
 //     * @return Categorie[] Returns an array of Categorie objects
 //     */

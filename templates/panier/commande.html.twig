@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Commande passée{% endblock %}
+
+{% block body %}
+    <div class="card col-md-12">
+        <div class="card-header">
+            <a class="btn-back text-secondary" href="/info/R401/fr/usager/commandes">
+                <i class="fas fa-2x fa-arrow-circle-left"></i>
+            </a>
+            <h3>
+                Commande Passée
+            </h3>
+        </div>
+        <div class="card-body">
+            L'usager {{ app.user.prenom }} {{ app.user.nom }}
+            a passé la commande n°
+            <span class="badge badge-pill badge-secondary">{{ commande.id }}</span>
+            le
+            {{ commande.dateCreation|date('d/m/Y H:i') }}
+            <hr>
+            <a class="btn btn-primary" href="{{ path('app_usager_commandes') }}">
+                Mes commandes
+            </a>
+        </div>
+    </div>
+{% endblock %}

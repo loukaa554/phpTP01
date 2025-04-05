@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvel Usager{% endblock %}
+
+{% block body %}
+    <div class="card col-md-6 offset-3">
+        <div class="card-header">
+            <a class="btn-back text-secondary" href={{ path('app_usager_index') }}>
+                <i class="fas fa-2x fa-arrow-circle-left"></i>
+            </a>
+            <h3>
+                <i class="fas fa-user-plus"></i>
+                Inscription
+            </h3>
+        </div>
+        <div class="card-body">
+            {# Inclusion du formulaire depuis un autre fichier partiel _form.html.twig #}
+            {{ include('usager/_form.html.twig', {'form': form}) }}
+
+            <hr>
+            <div class="col-md-12 text-right">
+                <p>
+                    Déjà client ?
+                    <a class="btn btn-secondary btn-" href={{ path('app_usager_index') }}>
+                        Connexion
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+{% endblock %}
